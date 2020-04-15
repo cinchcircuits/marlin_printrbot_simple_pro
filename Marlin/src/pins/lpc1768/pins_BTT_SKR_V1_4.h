@@ -157,7 +157,9 @@
   #define E1_CS_PIN                        P1_01
 #endif
 
-#define TEMP_1_PIN                      P0_23_A0  // A2 (T2) - (69) - TEMP_1_PIN
+// swapping temp 0 and temp 1 pin as I think I broke the first input
+#define TEMP_1_PIN                    P0_24_A1  // A1 (T1) - (68) - TEMP_0_PIN
+#define TEMP_0_PIN                      P0_23_A0  // A2 (T2) - (69) - TEMP_1_PIN
 #define TEMP_BED_PIN                    P0_25_A2  // A0 (T0) - (67) - TEMP_BED_PIN
 
 //
