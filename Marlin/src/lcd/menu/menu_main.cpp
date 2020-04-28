@@ -39,12 +39,8 @@
   #include "game/game.h"
 #endif
 
-#if EITHER(SDSUPPORT, HOST_PROMPT_SUPPORT) || defined(ACTION_ON_CANCEL)
-  #define MACHINE_CAN_STOP 1
-#endif
-#if ANY(SDSUPPORT, HOST_PROMPT_SUPPORT, PARK_HEAD_ON_PAUSE) || defined(ACTION_ON_PAUSE)
-  #define MACHINE_CAN_PAUSE 1
-#endif
+#define MACHINE_CAN_STOP (EITHER(SDSUPPORT, HOST_PROMPT_SUPPORT) || defined(ACTION_ON_CANCEL))
+#define MACHINE_CAN_PAUSE (ANY(SDSUPPORT, HOST_PROMPT_SUPPORT, PARK_HEAD_ON_PAUSE) || defined(ACTION_ON_PAUSE))
 
 #if ENABLED(PRUSA_MMU2)
   #include "../../lcd/menu/menu_mmu2.h"
@@ -139,13 +135,15 @@ void menu_main() {
           ACTION_ITEM(MSG_NO_MEDIA, nullptr);
         #else
           GCODES_ITEM(MSG_ATTACH_MEDIA, M21_STR);
+          ACTION_ITEM(MSG_MEDIA_RELEASED, nullptr);
         #endif
       }
 
     #endif // !HAS_ENCODER_WHEEL && SDSUPPORT
 
-    if (TERN0(MACHINE_CAN_PAUSE, printingIsPaused()))
-      ACTION_ITEM(MSG_RESUME_PRINT, ui.resume_print);
+    #if MACHINE_CAN_PAUSE
+      if (printingIsPaused()) ACTION_ITEM(MSG_RESUME_PRINT, ui.resume_print);
+    #endif
 
     SUBMENU(MSG_MOTION, menu_motion);
   }
@@ -203,7 +201,7 @@ void menu_main() {
       GCODES_ITEM(MSG_SWITCH_PS_ON, PSTR("M80"));
   #endif
 
-  #if BOTH(HAS_ENCODER_WHEEL, SDSUPPORT)
+  #if HAS_ENCODER_WHEEL && ENABLED(SDSUPPORT)
 
     // *** IF THIS SECTION IS CHANGED, REPRODUCE ABOVE ***
 
@@ -231,6 +229,7 @@ void menu_main() {
         ACTION_ITEM(MSG_NO_MEDIA, nullptr);
       #else
         GCODES_ITEM(MSG_ATTACH_MEDIA, M21_STR);
+        ACTION_ITEM(MSG_MEDIA_RELEASED, nullptr);
       #endif
     }
 
@@ -239,7 +238,9 @@ void menu_main() {
   #if HAS_SERVICE_INTERVALS
     static auto _service_reset = [](const int index) {
       print_job_timer.resetServiceInterval(index);
-      ui.completion_feedback();
+      #if HAS_BUZZER
+        ui.completion_feedback();
+      #endif
       ui.reset_status();
       ui.return_to_status();
     };

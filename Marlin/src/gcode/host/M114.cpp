@@ -213,6 +213,8 @@ void GcodeSuite::M114() {
     if (parser.seen('R')) { report_real_position(); return; }
   #endif
 
-  TERN_(M114_LEGACY, planner.synchronize());
+  #if ENABLED(M114_LEGACY)
+    planner.synchronize();
+  #endif
   report_current_position_projected();
 }

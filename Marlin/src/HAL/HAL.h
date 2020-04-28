@@ -27,10 +27,8 @@
 
 #define HAL_ADC_RANGE _BV(HAL_ADC_RESOLUTION)
 
-#ifndef I2C_ADDRESS
-  #define I2C_ADDRESS(A) (A)
-#endif
-
 inline void watchdog_refresh() {
-  TERN_(USE_WATCHDOG, HAL_watchdog_refresh());
+  #if ENABLED(USE_WATCHDOG)
+    HAL_watchdog_refresh();
+  #endif
 }

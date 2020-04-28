@@ -211,7 +211,11 @@ void HardFault_HandlerC(unsigned long *sp, unsigned long lr, unsigned long cause
 
   // Nothing below here is compiled because NVIC_SystemReset loops forever
 
-  for (;;) { TERN_(USE_WATCHDOG, watchdog_init()); }
+  for (;;) {
+    #if ENABLED(USE_WATCHDOG)
+      watchdog_init();
+    #endif
+  }
 }
 
 extern "C" {

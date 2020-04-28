@@ -141,10 +141,6 @@ namespace ExtUI {
       void setMeshPoint(const xy_uint8_t &pos, const float zval);
       void onMeshUpdate(const int8_t xpos, const int8_t ypos, const float zval);
       inline void onMeshUpdate(const xy_int8_t &pos, const float zval) { onMeshUpdate(pos.x, pos.y, zval); }
-
-      typedef enum : unsigned char { PROBE_START, PROBE_FINISH } probe_state_t;
-      void onMeshUpdate(const int8_t xpos, const int8_t ypos, probe_state_t state);
-      inline void onMeshUpdate(const xy_int8_t &pos, probe_state_t state) { onMeshUpdate(pos.x, pos.y, state); }
     #endif
   #endif
 
@@ -186,7 +182,7 @@ namespace ExtUI {
     void setLinearAdvance_mm_mm_s(const float, const extruder_t);
   #endif
 
-  #if HAS_JUNCTION_DEVIATION
+  #if DISABLED(CLASSIC_JERK)
     float getJunctionDeviation_mm();
     void setJunctionDeviation_mm(const float);
   #else
@@ -339,7 +335,6 @@ namespace ExtUI {
   void onUserConfirmRequired(const char * const msg);
   void onUserConfirmRequired_P(PGM_P const pstr);
   void onStatusChanged(const char * const msg);
-  void onStatusChanged_P(PGM_P const pstr);
   void onFactoryReset();
   void onStoreSettings(char *);
   void onLoadSettings(const char *);

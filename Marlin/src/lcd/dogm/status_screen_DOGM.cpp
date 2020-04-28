@@ -56,7 +56,7 @@
   #include "../../module/printcounter.h"
 #endif
 
-#if HAS_DUAL_MIXING
+#if DUAL_MIXING_EXTRUDER
   #include "../../feature/mixing.h"
 #endif
 
@@ -142,7 +142,7 @@ FORCE_INLINE void _draw_centered_temp(const int16_t temp, const uint8_t tx, cons
     #elif ANIM_HOTEND && DISABLED(STATUS_HOTEND_INVERTED) && ENABLED(STATUS_HOTEND_NUMBERLESS)
       #define OFF_BMP(N) status_hotend_a_bmp
       #define ON_BMP(N)  status_hotend_b_bmp
-    #elif BOTH(ANIM_HOTEND, STATUS_HOTEND_INVERTED)
+    #elif ANIM_HOTEND && ENABLED(STATUS_HOTEND_INVERTED)
       #define OFF_BMP(N) status_hotend##N##_b_bmp
       #define ON_BMP(N)  status_hotend##N##_a_bmp
     #else
@@ -305,7 +305,12 @@ FORCE_INLINE void _draw_centered_temp(const int16_t temp, const uint8_t tx, cons
 // Homed and known, display constantly.
 //
 FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const bool blink) {
-  const AxisEnum a = TERN(LCD_SHOW_E_TOTAL, axis == E_AXIS ? X_AXIS : axis, axis);
+  const AxisEnum a = (
+    #if ENABLED(LCD_SHOW_E_TOTAL)
+      axis == E_AXIS ? X_AXIS :
+    #endif
+    axis
+  );
   const uint8_t offs = (XYZ_SPACING) * a;
   lcd_put_wchar(X_LABEL_POS + offs, XYZ_BASELINE, axis_codes[axis]);
   lcd_moveto(X_VALUE_POS + offs, XYZ_BASELINE);
@@ -327,7 +332,11 @@ FORCE_INLINE void _draw_axis_value(const AxisEnum axis, const char *value, const
 
 void MarlinUI::draw_status_screen() {
 
-  static char xstring[TERN(LCD_SHOW_E_TOTAL, 12, 5)], ystring[5], zstring[8];
+  static char xstring[5
+    #if ENABLED(LCD_SHOW_E_TOTAL)
+      + 7
+    #endif
+  ], ystring[5], zstring[8];
   #if ENABLED(FILAMENT_LCD_DISPLAY)
     static char wstring[5], mstring[4];
   #endif
@@ -356,7 +365,11 @@ void MarlinUI::draw_status_screen() {
     #endif
   #endif
 
-  const bool showxy = TERN1(LCD_SHOW_E_TOTAL, !printingIsActive());
+  const bool showxy = (true
+    #if ENABLED(LCD_SHOW_E_TOTAL)
+      && !printingIsActive()
+    #endif
+  );
 
   // At the first page, generate new display values
   if (first_page) {
@@ -365,11 +378,15 @@ void MarlinUI::draw_status_screen() {
       #if ANIM_HOTEND
         HOTEND_LOOP() if (thermalManager.isHeatingHotend(e)) SBI(new_bits, HEATBIT_HOTEND + e);
       #endif
-      if (TERN0(ANIM_BED, thermalManager.isHeatingBed())) SBI(new_bits, HEATBIT_BED);
+      #if ANIM_BED
+        if (thermalManager.isHeatingBed()) SBI(new_bits, HEATBIT_BED);
+      #endif
       #if DO_DRAW_CHAMBER && HAS_HEATED_CHAMBER
         if (thermalManager.isHeatingChamber()) SBI(new_bits, HEATBIT_CHAMBER);
       #endif
-      if (TERN0(ANIM_CUTTER, cutter.enabled())) SBI(new_bits, HEATBIT_CUTTER);
+      #if ANIM_CUTTER
+        if (cutter.enabled()) SBI(new_bits, HEATBIT_CUTTER);
+      #endif
       heat_bits = new_bits;
     #endif
 
@@ -394,7 +411,13 @@ void MarlinUI::draw_status_screen() {
 
     // Progress / elapsed / estimation updates and string formatting to avoid float math on each LCD draw
     #if HAS_PRINT_PROGRESS
-      const progress_t progress = TERN(HAS_PRINT_PROGRESS_PERMYRIAD, get_progress_permyriad, get_progress_percent)();
+      const progress_t progress =
+        #if HAS_PRINT_PROGRESS_PERMYRIAD
+          get_progress_permyriad()
+        #else
+          get_progress_percent()
+        #endif
+      ;
       duration_t elapsed = print_job_timer.duration();
       const uint8_t p = progress & 0xFF, ev = elapsed.value & 0xFF;
       if (p != lastProgress) {
@@ -410,9 +433,15 @@ void MarlinUI::draw_status_screen() {
               estimation_x_pos = _SD_INFO_X(0);
             #endif
           }
-          else
-            strcpy(progress_string, TERN(PRINT_PROGRESS_SHOW_DECIMALS, permyriadtostr4(progress), ui8tostr3rj(progress / (PROGRESS_SCALE))));
-
+          else {
+            strcpy(progress_string, (
+              #if ENABLED(PRINT_PROGRESS_SHOW_DECIMALS)
+                permyriadtostr4(progress)
+              #else
+                ui8tostr3rj(progress / (PROGRESS_SCALE))
+              #endif
+            ));
+          }
           #if BOTH(SHOW_REMAINING_TIME, ROTATE_PROGRESS_DISPLAY) // Tri-state progress display mode
             progress_x_pos = _SD_INFO_X(strlen(progress_string) + 1);
           #endif
@@ -541,20 +570,20 @@ void MarlinUI::draw_status_screen() {
     // Laser / Spindle
     #if DO_DRAW_CUTTER
       if (cutter.power && PAGE_CONTAINS(STATUS_CUTTER_TEXT_Y - INFO_FONT_ASCENT, STATUS_CUTTER_TEXT_Y - 1)) {
-        lcd_put_u8str(STATUS_CUTTER_TEXT_X, STATUS_CUTTER_TEXT_Y, i16tostr3rj(cutter.power));
-        #if CUTTER_DISPLAY_IS(PERCENT)
-          lcd_put_wchar('%');
-        #elif CUTTER_DISPLAY_IS(RPM)
-          lcd_put_wchar('K');
-        #endif
+        lcd_put_u8str(STATUS_CUTTER_TEXT_X, STATUS_CUTTER_TEXT_Y, i16tostr3rj(cutter.powerPercent(cutter.power)));
+        lcd_put_wchar('%');
       }
     #endif
 
     // Heated Bed
-    TERN_(DO_DRAW_BED, _draw_bed_status(blink));
+    #if DO_DRAW_BED
+      _draw_bed_status(blink);
+    #endif
 
     // Heated Chamber
-    TERN_(DO_DRAW_CHAMBER, _draw_chamber_status());
+    #if DO_DRAW_CHAMBER
+      _draw_chamber_status();
+    #endif
 
     // Fan, if a bitmap was provided
     #if DO_DRAW_FAN
@@ -687,7 +716,7 @@ void MarlinUI::draw_status_screen() {
         u8g.setColorIndex(0); // white on black
       #endif
 
-      #if HAS_DUAL_MIXING
+      #if DUAL_MIXING_EXTRUDER
 
         // Two-component mix / gradient instead of XY
 

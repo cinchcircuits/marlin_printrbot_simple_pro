@@ -21,7 +21,7 @@
  */
 
 #include "serial.h"
-#include "../inc/MarlinConfig.h"
+#include "language.h"
 
 uint8_t marlin_debug_flags = MARLIN_DEBUG_NONE;
 

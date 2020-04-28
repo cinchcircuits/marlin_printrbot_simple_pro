@@ -33,10 +33,8 @@
 //
 // EEPROM
 //
-#if NONE(FLASH_EEPROM_EMULATION, SDCARD_EEPROM_EMULATION)
-  #define FLASH_EEPROM_EMULATION
-  //#define SDCARD_EEPROM_EMULATION
-#endif
+#define FLASH_EEPROM_EMULATION
+//#define SDCARD_EEPROM_EMULATION
 
 //
 // Enable 12MHz clock output on P1.27 pin to sync TMC2208 chip clocks

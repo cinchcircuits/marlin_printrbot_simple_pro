@@ -145,7 +145,9 @@ void reset_bed_level() {
       bilinear_grid_spacing.reset();
       GRID_LOOP(x, y) {
         z_values[x][y] = NAN;
-        TERN_(EXTENSIBLE_UI, ExtUI::onMeshUpdate(x, y, 0));
+        #if ENABLED(EXTENSIBLE_UI)
+          ExtUI::onMeshUpdate(x, y, 0);
+        #endif
       }
     #elif ABL_PLANAR
       planner.bed_level_matrix.set_to_identity();
@@ -243,7 +245,9 @@ void reset_bed_level() {
 
     current_position = pos;
 
-    TERN_(LCD_BED_LEVELING, ui.wait_for_move = false);
+    #if ENABLED(LCD_BED_LEVELING)
+      ui.wait_for_move = false;
+    #endif
   }
 
 #endif

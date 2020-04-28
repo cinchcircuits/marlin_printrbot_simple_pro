@@ -52,7 +52,7 @@
 // ------------------------
 
 #ifndef STM32_FLASH_SIZE
-  #if defined(MCU_STM32F103RE) || defined(MCU_STM32F103VE)
+  #ifdef MCU_STM32F103RE
     #define STM32_FLASH_SIZE 512
   #else
     #define STM32_FLASH_SIZE 256

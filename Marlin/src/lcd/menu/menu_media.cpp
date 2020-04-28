@@ -26,7 +26,7 @@
 
 #include "../../inc/MarlinConfigPre.h"
 
-#if BOTH(HAS_LCD_MENU, SDSUPPORT)
+#if HAS_LCD_MENU && ENABLED(SDSUPPORT)
 
 #include "menu.h"
 #include "../../sd/cardreader.h"
@@ -113,7 +113,9 @@ class MenuItem_sdfolder : public MenuItem_sdbase {
       encoderTopLine = 0;
       ui.encoderPosition = 2 * (ENCODER_STEPS_PER_MENU_ITEM);
       ui.screen_changed = true;
-      TERN_(HAS_GRAPHICAL_LCD, ui.drawing_screen = false);
+      #if HAS_GRAPHICAL_LCD
+        ui.drawing_screen = false;
+      #endif
       ui.refresh();
     }
 };
@@ -140,7 +142,14 @@ void menu_media() {
 
   if (ui.should_draw()) for (uint16_t i = 0; i < fileCnt; i++) {
     if (_menuLineNr == _thisItemNr) {
-      card.getfilename_sorted(SD_ORDER(i, fileCnt));
+      const uint16_t nr =
+        #if ENABLED(SDCARD_RATHERRECENTFIRST) && DISABLED(SDCARD_SORT_ALPHA)
+          fileCnt - 1 -
+        #endif
+      i;
+
+      card.getfilename_sorted(nr);
+
       if (card.flag.filenameIsDir)
         MENU_ITEM(sdfolder, MSG_MEDIA_MENU, card);
       else

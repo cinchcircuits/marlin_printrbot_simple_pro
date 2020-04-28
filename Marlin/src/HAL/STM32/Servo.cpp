@@ -52,7 +52,9 @@ void libServo::move(const int value) {
   if (attach(0) >= 0) {
     write(value);
     safe_delay(delay);
-    TERN_(DEACTIVATE_SERVOS_AFTER_MOVE, detach());
+    #if ENABLED(DEACTIVATE_SERVOS_AFTER_MOVE)
+      detach();
+    #endif
   }
 }
 #endif // HAS_SERVOS

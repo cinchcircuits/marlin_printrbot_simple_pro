@@ -26,7 +26,7 @@
 
 #include "../../inc/MarlinConfigPre.h"
 
-#if BOTH(HAS_LCD_MENU, CANCEL_OBJECTS)
+#if HAS_LCD_MENU && ENABLED(CANCEL_OBJECTS)
 
 #include "menu.h"
 #include "menu_addon.h"
@@ -44,7 +44,9 @@ static void lcd_cancel_object_confirm() {
   MenuItem_confirm::confirm_screen(
     []{
       cancelable.cancel_object(MenuItemBase::itemIndex - 1);
-      ui.completion_feedback();
+      #if HAS_BUZZER
+        ui.completion_feedback();
+      #endif
       ui.goto_previous_screen();
     },
     ui.goto_previous_screen,
