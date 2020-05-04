@@ -732,7 +732,7 @@
  *                                      X, Y, Z, E0 [, E1[, E2...]]
  */
 // M92 X404.02 Y392.88 Z1662.35 E121.73
-#define DEFAULT_AXIS_STEPS_PER_UNIT   { 404.02, 392.82, 1662.22, 121.6 }
+#define DEFAULT_AXIS_STEPS_PER_UNIT   { 404.02, 392.82, 1662.22, 474 }
 //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 101.02, 100.82, 398.22, 124.6 }
 //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 202.04, 201.64, 778.44, 249.2 }
 //#define DEFAULT_AXIS_STEPS_PER_UNIT   { 50.51, 50.41, 199.1, 62.3 }
@@ -970,7 +970,7 @@
  *
  * Specify a Probe position as { X, Y, Z }
  */
-#define NOZZLE_TO_PROBE_OFFSET { 20, 2, -5 }
+#define NOZZLE_TO_PROBE_OFFSET { 20, 2, -2.6 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1250,12 +1250,12 @@
   /**
    * Enable the G26 Mesh Validation Pattern tool.
    */
-  //#define G26_MESH_VALIDATION
+  #define G26_MESH_VALIDATION
   #if ENABLED(G26_MESH_VALIDATION)
-    #define MESH_TEST_NOZZLE_SIZE    0.3  // (mm) Diameter of primary nozzle.
+    #define MESH_TEST_NOZZLE_SIZE    0.4  // (mm) Diameter of primary nozzle.
     #define MESH_TEST_LAYER_HEIGHT   0.2  // (mm) Default layer height for the G26 Mesh Validation Tool.
-    #define MESH_TEST_HOTEND_TEMP  205    // (°C) Default nozzle temperature for the G26 Mesh Validation Tool.
-    #define MESH_TEST_BED_TEMP      50    // (°C) Default bed temperature for the G26 Mesh Validation Tool.
+    #define MESH_TEST_HOTEND_TEMP  210    // (°C) Default nozzle temperature for the G26 Mesh Validation Tool.
+    #define MESH_TEST_BED_TEMP      60    // (°C) Default bed temperature for the G26 Mesh Validation Tool.
     #define G26_XY_FEEDRATE         20    // (mm/s) Feedrate for XY Moves for the G26 Mesh Validation Tool.
     #define G26_RETRACT_MULTIPLIER   1.0  // G26 Q (retraction) used by default between mesh test elements.
   #endif
